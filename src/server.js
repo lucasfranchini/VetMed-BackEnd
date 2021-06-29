@@ -1,3 +1,5 @@
-import app from './app.js'
+import app from "./app.js";
 
-app.listen(4000,()=>{console.log('Server is Running')})
+const port = 4000;
+const nodeEnv = process.env.NODE_ENV;
+app.listen(port, () => console.log(`Server is Running on port ${port} with NOVE_ENV ${nodeEnv}`));
