@@ -1,7 +1,8 @@
 import connection from './database.js';
 
-export default async function categyList(req,res){
+export default async function categoryList(req,res){
     try{
+
         if(req.query.main==='true'){
             return res.send(
                 [{id:1,name:'capsulas',img:'https://images.vexels.com/media/users/3/200358/isolated/preview/7395e5aa40eeb6e600253a52650f816c-p-iacute-lula-de-c-aacute-psula-by-vexels.png'}, 

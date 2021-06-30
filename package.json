@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "./src/server.js",
-  "type": "module",
   "scripts": {
     "test": "NOVE_ENV=test npx jest -i"
   },

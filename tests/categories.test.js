@@ -6,7 +6,7 @@ import connection from "../src/database";
 beforeAll(async ()=>{
     await connection.query(`DELETE FROM categories`)
     await connection.query(`INSERT INTO categories (name) VALUES ('capsulas'),('colirios'),('higiene'),('sprays'),('ração'),('pós'),('xaropes'),('homeopatias')`)
-
+    
 })
 afterAll(()=>{
     connection.end()
