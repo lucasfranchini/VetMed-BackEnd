@@ -16,12 +16,8 @@ export default async function productList(req,res){
         LIMIT $1
         OFFSET $2
         `,[limit,offset,id])
-        console.log(result.rows,comparator,id,offset,limit)
         if(result.rowCount===0){
             const categoryExists = await connection.query(`SELECT * FROM categories WHERE id = $1`,[id])
-            const test = await connection.query(`SELECT * FROM categories `)
-            console.log(test.rows)
-            console.log(productExist.rows)
             if(categoryExists.rowCount>0){
                 return res.send({name:categoryExists.rows[0].categoryName, products: []})
             }

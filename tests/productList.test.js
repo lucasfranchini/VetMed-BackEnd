@@ -6,7 +6,6 @@ beforeAll(async ()=>{
     await connection.query(`DELETE FROM categories`)
     const result = await connection.query(`INSERT INTO categories (name) VALUES ('capsulas'),('colirios'),('higiene'),('sprays'),('ração'),('pós'),('xaropes'),('homeopatias') RETURNING ID`)
     await connection.query(`DELETE FROM products`)
-    console.log(result.rows)
     await connection.query(`
     INSERT INTO products 
     (name,description,price,img,"categorieId") 
