@@ -6,7 +6,9 @@ import connection from "../src/database";
 beforeAll(async ()=>{
     await connection.query(`DELETE FROM categories`)
     await connection.query(`INSERT INTO categories (name) VALUES ('capsulas'),('colirios'),('higiene'),('sprays'),('ração'),('pós'),('xaropes'),('homeopatias')`)
-
+    for(let i=0;i<10;i++){
+        await connection.query(`insert into products (name,description,price,img,"categorieId") VALUES ('beluga ${i}', 'a' , 1590 ,'https://1.bp.blogspot.com/-Wh7jbgD9FbU/Wz2oOZkDEeI/AAAAAAAAE1c/3fr3xnaZEXw7-NmY0unM7Dgo7ccbvXT2wCLcBGAs/s1600/beluga.jpg', ${i%6})`)
+    }
 })
 afterAll(()=>{
     connection.end()
