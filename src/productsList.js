@@ -26,7 +26,7 @@ export default async function productList(req,res){
             }
         }
         
-        res.send({name:result.rows[0].categoryName, products: result.rows})
+        res.send({name:id?result.rows[0].categoryName:"Os Mais Vendidos", products: result.rows})
     }
     catch (e){
         console.log(e);
