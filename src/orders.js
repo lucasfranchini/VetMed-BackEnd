@@ -19,7 +19,7 @@ const orderSchema = joi.object({
   recipientEmail: joi.string().email(),
   street: joi.string().min(1),
   number: joi.number().integer().min(0),
-  adjunct: joi.string(),
+  adjunct: joi.string().allow(""),
   neighbourhood: joi.string().min(1),
   postalCode: joi.string().min(1),
   paymentType: joi.string().pattern(/(^cc$)/),
@@ -28,7 +28,7 @@ const orderSchema = joi.object({
       id: joi.number().integer().min(1).required(),
       qtd: joi.number().integer().min(1).required(),
     })
-  ),
+  )
 });
 
 const authorizationSchema = joi
@@ -41,13 +41,13 @@ const authorizationSchema = joi
 export async function postOrder(req, res) {
   try {
     //validating data from the frontend
-    const { orderStructureError } = orderStructureSchema.validate(req.body);
+    const { error: orderStructureError } = orderStructureSchema.validate(req.body);
     if (orderStructureError) throw new errorWithStatus(400);
 
-    const { orderValidationError } = orderSchema.validate(req.body);
+    const { error: orderValidationError } = orderSchema.validate(req.body);
     if (orderValidationError) throw new errorWithStatus(422);
 
-    const { authorizationError } = authorizationSchema.validate(
+    const { error: authorizationError } = authorizationSchema.validate(
       req.headers.authorization
     );
     if (authorizationError) new errorWithStatus(401);

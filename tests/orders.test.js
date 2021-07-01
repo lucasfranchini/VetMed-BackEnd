@@ -23,6 +23,7 @@ beforeAll(async () => {
 
   id = undefined;
   token = undefined;
+  productId = undefined;
   //
   //create test account using test@login.com as email
   await connection.query(
@@ -76,6 +77,7 @@ beforeAll(async () => {
     ('testProduct', 'this is a test', 33, 'https://hiperideal.vteximg.com.br/arquivos/ids/171306-1000-1000/12696.jpg?v=636626179776100000', $1)
     RETURNING id 
   `,[categoryId]);
+
   productId = dbProductId.rows[0].id;
 });
 
@@ -100,52 +102,10 @@ describe("POST /orders", () => {
           qtd: 2,
         }]
     }
+
     const result = await supertest(app).post("/orders").send(body).set(headers);
     expect(result.status).toEqual(201);
   });
 
-  // it("returns status 400 when the request structure is wrong", async () => {
-  //   const user = {};
-  //   const result = await supertest(app).post("/login").send(user);
-  //   expect(result.status).toEqual(400);
-  // });
-
-  // it("returns status 401 when the password is wrong", async () => {
-  //   const user = { email, password: "wrongpassword" };
-  //   const result = await supertest(app).post("/login").send(user);
-  //   expect(result.status).toEqual(401);
-  // });
-
-  // it("returns status 404 when the email is not found", async () => {
-  //   const user = { email: "wrongemail@login.com", password };
-  //   const result = await supertest(app).post("/login").send(user);
-  //   expect(result.status).toEqual(404);
-  // });
-
-  // it("returns status 422 when the values do not match the schema", async () => {
-  //   const user = { email: 0, password: 0 };
-  //   const result = await supertest(app).post("/login").send(user);
-  //   expect(result.status).toEqual(422);
-  // });
+  
 });
-
-// describe("POST /login/withToken", () => {
-//   it("returns status 200 on successful login", async () => {
-//     const headers = { Authorization: `Bearer ${token}` };
-//     const result = await supertest(app).post("/login/withToken").set(headers);
-//     expect(result.status).toEqual(200);
-//   });
-
-//   it("returns status 401 when it receives a bad authorization header", async () => {
-//     const headers = { Authorization: "" };
-//     const result = await supertest(app).post("/login/withToken").set(headers);
-//     expect(result.status).toEqual(401);
-//   });
-
-//   it("returns status 404 when session can't be found", async () => {
-//     const randomToken = uuidv4();
-//     const headers = { Authorization: `Bearer ${randomToken}` };
-//     const result = await supertest(app).post("/login/withToken").set(headers);
-//     expect(result.status).toEqual(404);
-//   });
-// });
