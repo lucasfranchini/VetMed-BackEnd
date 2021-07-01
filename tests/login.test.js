@@ -1,3 +1,4 @@
+import '../src/setup.js';
 import { afterAll, expect, it } from "@jest/globals";
 import bcrypt from "bcrypt";
 import supertest from "supertest";
@@ -6,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import toMatchSchema from "./toMatchSchema.js";
 import connection from "../src/database.js";
+
 import flushDatabase from "./flushDatabase.js";
 import app from "../src/app.js";
 

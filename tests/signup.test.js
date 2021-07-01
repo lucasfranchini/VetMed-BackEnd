@@ -1,3 +1,4 @@
+import '../src/setup.js';
 import { afterAll, expect, it } from "@jest/globals";
 import supertest from "supertest";
 

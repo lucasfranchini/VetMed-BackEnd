@@ -1,7 +1,7 @@
+import '../src/setup.js';
 import { afterAll, expect, it } from "@jest/globals";
 import bcrypt from "bcrypt";
 import supertest from "supertest";
-import joi from "joi";
 import { v4 as uuidv4 } from "uuid";
 
 import toMatchSchema from "./toMatchSchema.js";
