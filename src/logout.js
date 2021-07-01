@@ -1,5 +1,6 @@
 import errorWithStatus from "./errorWithStatus.js";
 import connection from "./database.js";
+import joi from 'joi';
 
 const authorizationSchema = joi
   .string()
