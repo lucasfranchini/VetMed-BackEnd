@@ -1,6 +1,9 @@
 import connection from "./database.js";
 import joi from "joi";
 import errorWithStatus from "./errorWithStatus.js";
+import sgMail from '@sendgrid/mail';
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const orderStructureSchema = joi.object({
   recipient: joi.required(),
@@ -142,8 +145,78 @@ export async function postOrder(req, res) {
           sales[i].subTotal,
         ]
       );
-    }
+    };
 
+    const dbProductNames = await connection.query(`
+      SELECT *
+      FROM products
+    `);
+
+    const productNames = {}
+    dbProductNames.rows.forEach(row=>{
+      productNames[row.id] = row.name;
+    });
+
+    let text = `
+      Obrigado por comprar com a vetmed!\n
+      \n
+      o pedido de:\n
+    `;
+    sales.forEach(sale=>{
+      text += `${sale.qtd}x ${productNames[sale.productId]} R$${(sale.subTotal/100).toFixed(2)} \n`
+    });
+
+    const total = (sales.reduce((acc,sale)=>acc+=sale.subTotal,0)/100).toFixed(2);
+    text+=`
+      Com um total de: R$${total}\n
+      Será entregue para:\n
+      ${recipient}\n
+      Rua ${street}\n
+      número ${number}\n
+      complemento ${adjunct}\n
+      cep ${postalCode}\n
+    `;
+
+    let html = `
+      <p>Obrigado por comprar com a vetmed!</p>
+      <br/>
+      <p>o pedido de:</p>
+    `;
+    sales.forEach(sale=>{
+      html += `<p>${sale.qtd}x ${productNames[sale.productId]} R$${(sale.subTotal/100).toFixed(2)} </p>`
+    });
+
+    html+=`
+      <p>Com um total de: R$${total}</p>
+      <p>Será entregue para:</p>
+      <p>${recipient}</p>
+      <p>Rua ${street}</p>
+      <p>número ${number}</p>
+      <p>complemento ${adjunct}</p>
+      <p>cep ${postalCode}</p>
+    `;
+
+    const msg = {
+      to: recipientEmail,
+      from: "vitor.registros@lourencos.net",
+      subject: 'Sua compra foi processada!',
+      text,
+      html,
+    };
+
+    await (async () => {
+      try {
+        await sgMail.send(msg);
+      } catch (error) {
+        console.error(error);
+    
+        if (error.response) {
+          console.error(error.response.body)
+        }
+      }
+    })();
+
+    throw new errorWithStatus(600);
     res.sendStatus(201);
   } catch (err) {
     if (err.status) res.sendStatus(err.status);
