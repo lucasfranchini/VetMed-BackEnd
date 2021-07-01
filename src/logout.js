@@ -22,7 +22,7 @@ export default async function logout(req, res) {
     ;`,
       [token]
     );
-    res.sendStatus(200);
+    res.sendStatus(201);
   } catch (err) {
     if (err.status) res.sendStatus(err.status);
     else res.sendStatus(500);
