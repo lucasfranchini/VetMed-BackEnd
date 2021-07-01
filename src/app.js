@@ -7,6 +7,7 @@ import categoryList from './categoryList.js';
 import productList from "./productsList.js";
 import searchProducts from "./searchProducts.js";
 import {postOrder} from './orders.js';
+import logout from './logout.js';
 
 const app = express();
 app.use(cors());
@@ -22,4 +23,5 @@ app.post("/login/withtoken", (req, res) => loginWithToken(req, res));
 app.post("/signup", (req, res) => signup(req, res));
 
 app.post("/orders", (req,res) => postOrder(req,res));
+app.post("/logout", (req,res) => logout(req,res));
 export default app;
