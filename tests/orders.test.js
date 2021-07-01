@@ -86,9 +86,9 @@ afterAll(() => {
 });
 
 describe("POST /orders", () => {
+
   it("returns status 201 on successful new order", async () => {
-    const headers = { Authorization: `Bearer ${token}` };
-    const body = {
+    const validBody = {
       recipient: "test",
       recipientEmail: "test@gmail.com",
       street: "test street",
@@ -101,11 +101,107 @@ describe("POST /orders", () => {
           id: productId,
           qtd: 2,
         }]
-    }
+    };
+    
+    const validHeaders = { Authorization: `Bearer ${token}` };
 
-    const result = await supertest(app).post("/orders").send(body).set(headers);
+    const result = await supertest(app).post("/orders").send(validBody).set(validHeaders);
     expect(result.status).toEqual(201);
   });
 
-  
+  it("returns status 400 for requests with a bad structure", async () => {
+    const validBody = {
+      recipient: "test",
+      recipientEmail: "test@gmail.com",
+      street: "test street",
+      number: 42,
+      adjunct: "",
+      neighbourhood: "test neighbourhood",
+      postalCode: "20540-222",
+      paymentType: "cc",
+      cart: [{
+          id: productId,
+          qtd: 2,
+        }]
+    };
+    
+    const validHeaders = { Authorization: `Bearer ${token}` };
+
+    const body = JSON.parse(JSON.stringify(validBody));
+    delete body.cart;
+    const result = await supertest(app).post("/orders").send(body).set(validHeaders);
+    expect(result.status).toEqual(400);
+  });
+
+  it("returns status 401 for requests with invalid authorization", async () => {
+    const validBody = {
+      recipient: "test",
+      recipientEmail: "test@gmail.com",
+      street: "test street",
+      number: 42,
+      adjunct: "",
+      neighbourhood: "test neighbourhood",
+      postalCode: "20540-222",
+      paymentType: "cc",
+      cart: [{
+          id: productId,
+          qtd: 2,
+        }]
+    };
+    
+    const validHeaders = { Authorization: `Bearer ${token}` };
+
+    const headers = {};
+    const result = await supertest(app).post("/orders").send(validBody).set(headers);
+    expect(result.status).toEqual(401);
+  });
+
+  it("returns status 404 for requests with token not found", async () => {
+    const validBody = {
+      recipient: "test",
+      recipientEmail: "test@gmail.com",
+      street: "test street",
+      number: 42,
+      adjunct: "",
+      neighbourhood: "test neighbourhood",
+      postalCode: "20540-222",
+      paymentType: "cc",
+      cart: [{
+          id: productId,
+          qtd: 2,
+        }]
+    };
+    
+    const validHeaders = { Authorization: `Bearer ${token}` };
+
+    const randomtoken = uuidv4();
+    const headers = { Authorization: `Bearer ${randomtoken}` };
+    const result = await supertest(app).post("/orders").send(validBody).set(headers);
+    expect(result.status).toEqual(404);
+  });
+
+  it("returns status 422 for requests with invalid body data", async () => {
+    const validBody = {
+      recipient: "test",
+      recipientEmail: "test@gmail.com",
+      street: "test street",
+      number: 42,
+      adjunct: "",
+      neighbourhood: "test neighbourhood",
+      postalCode: "20540-222",
+      paymentType: "cc",
+      cart: [{
+          id: productId,
+          qtd: 2,
+        }]
+    };
+    
+    const validHeaders = { Authorization: `Bearer ${token}` };
+    
+    const body = JSON.parse(JSON.stringify(validBody));
+    body.cart = [];
+    const result = await supertest(app).post("/orders").send(body).set(validHeaders);
+    expect(result.status).toEqual(422);
+  });
+
 });

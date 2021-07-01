@@ -23,7 +23,7 @@ const orderSchema = joi.object({
   neighbourhood: joi.string().min(1),
   postalCode: joi.string().min(1),
   paymentType: joi.string().pattern(/(^cc$)/),
-  cart: joi.array().items(
+  cart: joi.array().min(1).items(
     joi.object({
       id: joi.number().integer().min(1).required(),
       qtd: joi.number().integer().min(1).required(),
@@ -48,9 +48,9 @@ export async function postOrder(req, res) {
     if (orderValidationError) throw new errorWithStatus(422);
 
     const { error: authorizationError } = authorizationSchema.validate(
-      req.headers.authorization
+      req.headers?.authorization
     );
-    if (authorizationError) new errorWithStatus(401);
+    if (authorizationError) throw new errorWithStatus(401);
     //
     //checking if user has an active session
     const token = req.headers.authorization.replace("Bearer ", "");
