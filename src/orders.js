@@ -216,7 +216,6 @@ export async function postOrder(req, res) {
       }
     })();
 
-    throw new errorWithStatus(600);
     res.sendStatus(201);
   } catch (err) {
     if (err.status) res.sendStatus(err.status);
