@@ -26,9 +26,9 @@ const orderSchema = joi.object({
   cart: joi.array().items(
     joi.object({
       id: joi.number().integer().min(1).required(),
-      qtd: joi.number().integer().min(1).required()
+      qtd: joi.number().integer().min(1).required(),
     })
-  )
+  ),
 });
 
 const authorizationSchema = joi
@@ -38,25 +38,30 @@ const authorizationSchema = joi
   )
   .required();
 
-export async function postOrder(req,res){
-  try{
+export async function postOrder(req, res) {
+  try {
     //validating data from the frontend
-    const {orderStructureError} = orderStructureSchema.validate(req.body);
+    const { orderStructureError } = orderStructureSchema.validate(req.body);
     if (orderStructureError) throw new errorWithStatus(400);
 
-    const {orderValidationError} = orderSchema.validate(req.body);
+    const { orderValidationError } = orderSchema.validate(req.body);
     if (orderValidationError) throw new errorWithStatus(422);
 
-    const {authorizationError} = authorizationSchema.validate(req.headers.authorization);
+    const { authorizationError } = authorizationSchema.validate(
+      req.headers.authorization
+    );
     if (authorizationError) new errorWithStatus(401);
     //
     //checking if user has an active session
-    const token = req.headers.authorization.replace('Bearer ',"");
-    const dbUserId = await connection.query(`
+    const token = req.headers.authorization.replace("Bearer ", "");
+    const dbUserId = await connection.query(
+      `
       SELECT "userId"
       FROM sessions
       WHERE token = $1
-    `,[token]);
+    `,
+      [token]
+    );
 
     if (dbUserId.rows.length !== 1) throw new errorWithStatus(404);
     const userId = dbUserId.rows[0].userId;
@@ -67,67 +72,82 @@ export async function postOrder(req,res){
       FROM products
     `);
     const allPrices = {};
-    dbAllPrices.rows.forEach(row=>{
+    dbAllPrices.rows.forEach((row) => {
       allPrices[row.id] = row.price;
     });
 
-    const productIdList = req.body.cart.map(product => product.id);
-    productIdList.forEach(id=>{
+    const productIdList = req.body.cart.map((product) => product.id);
+    productIdList.forEach((id) => {
       if (!allPrices.hasOwnProperty(id)) throw new errorWithStatus(404);
-    })
+    });
     //
-    const {recipient,
+    const {
+      recipient,
       recipientEmail,
       street,
       number,
       adjunct,
       neighbourhood,
       postalCode,
-      paymentType} = req.body;
+      paymentType,
+    } = req.body;
 
-    const dbOrderId = await connection.query(`
+    const dbOrderId = await connection.query(
+      `
       INSERT INTO orders
       ("userId", "paymentType", street, number, adjunct, neighbourhood, "postalCode", recipient, "recipientEmail", "createdAt")
       VALUES
       ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
       RETURNING id
-    `,[
-      userId,
-      paymentType,
-      street,
-      number,
-      adjunct,
-      neighbourhood,
-      postalCode,
-      recipient,
-      recipientEmail,
-    ]);
+    `,
+      [
+        userId,
+        paymentType,
+        street,
+        number,
+        adjunct,
+        neighbourhood,
+        postalCode,
+        recipient,
+        recipientEmail,
+      ]
+    );
     const orderId = dbOrderId.rows[0].id;
 
-    const sales = req.body.cart.map(({id,qtd})=>{
-      return ({
+    const sales = req.body.cart.map(({ id, qtd }) => {
+      return {
         userId,
         orderId,
         productId: id,
         qtd,
         unitSoldFor: allPrices[id],
-        subTotal: allPrices[id]*qtd
-      });
+        subTotal: allPrices[id] * qtd,
+      };
     });
 
-    for (let i=0; i<sales.length; i++){
-      await connection.query(`
+    for (let i = 0; i < sales.length; i++) {
+      await connection.query(
+        `
         INSERT INTO sales
         ("userId", "orderId", "productId", qtd, "unitSoldFor", "subTotal")
         VALUES
         ($1, $2, $3, $4, $5, $6)
-      `,[sales[i].userId, sales[i].orderId, sales[i].productId, sales[i].qtd, sales[i].unitSoldFor, sales[i].subTotal]);
+      `,
+        [
+          sales[i].userId,
+          sales[i].orderId,
+          sales[i].productId,
+          sales[i].qtd,
+          sales[i].unitSoldFor,
+          sales[i].subTotal,
+        ]
+      );
     }
 
     res.sendStatus(201);
-  } catch(err) {
+  } catch (err) {
     if (err.status) res.sendStatus(err.status);
     else res.sendStatus(500);
     console.log(err);
   }
-};
+}
